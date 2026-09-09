@@ -1,0 +1,9 @@
+# .skillignore — 仅本地打包过滤规则，不进发布包
+# 打包 SkillHub zip 时排除以下内容：
+__pycache__/
+*.pyc
+*.pyo
+.git/
+.skillignore
+session_handoff.md
+docs/

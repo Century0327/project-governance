@@ -458,14 +458,15 @@ def test_adversarial(work: Path) -> None:
     ok = text.count("src/") == 1
     record("adv: index idempotent across runs", ok)
 
-    # A10 multiple '## Root layout' sections -> no crash, first replaced
+    # A10 multiple '## Root layout' sections -> A-2 blocks (second root is
+    # treated as manual content between machine blocks)
     d = fresh(work, "adv_multi_root")
     (d / "index.md").write_text(
         "# I\n\n## Root layout\n```\none\n```\n\n## Root layout\n```\ntwo\n```\n\n## Change log\n- x\n",
         encoding="utf-8",
     )
     code, exc = run("cmd_index", _ns(d, None, None))
-    record("adv: multiple Root layout sections no crash", code == 0 and exc is None, f"exit={code} exc={type(exc).__name__ if exc else None}")
+    record("adv: multiple Root layout sections blocked by A-2", code != 0 and exc is None, f"exit={code} exc={type(exc).__name__ if exc else None}")
 
     # A11 '## Root layout' inside an earlier code block -> no crash
     d = fresh(work, "adv_false_match")
@@ -673,6 +674,139 @@ def test_check(work: Path) -> None:
     record("check: custom section names honored", code == 0 and exc is None, f"exit={code}")
 
 
+def test_v120_features(work: Path) -> None:
+    """v1.2.0 regression: A-2 manual-block protection (3 scenarios), A-3
+    Record time, A-4 parameter provenance, A-9a Expected/Actual diff,
+    A-9b warning anti-noise."""
+    # --- A-2 scenario 1: pure machine block updates normally ---
+    d = fresh(work, "v12_a2_pure")
+    make_index_md(d)
+    (d / "src").mkdir()
+    (d / "src" / "main.py").write_text("x", encoding="utf-8")
+    code, exc = run("cmd_index", _ns(d, None, False))
+    text = (d / "index.md").read_text(encoding="utf-8")
+    ok = code == 0 and "main.py" in text and "index-meta:" in text
+    record("v1.2 A-2: pure machine block updates normally", ok, f"exit={code}")
+
+    # --- A-2 scenario 2: manual content between machine blocks -> default stop ---
+    d = fresh(work, "v12_a2_manual")
+    make_index_md(d)
+    text = (d / "index.md").read_text(encoding="utf-8")
+    text = text.replace("## Change log", "## Manual notes\n人工补充说明\n\n## Change log")
+    (d / "index.md").write_text(text, encoding="utf-8")
+    code, exc = run("cmd_index", _ns(d, None, False))
+    after = (d / "index.md").read_text(encoding="utf-8")
+    ok = code != 0 and exc is None and "人工补充说明" in after
+    record("v1.2 A-2: manual content blocks update by default", ok, f"exit={code}")
+
+    # --- A-2 scenario 3: explicit --force allows overwrite; it only lifts the
+    # manual-content guard and changes nothing else about index generation ---
+    code, exc = run("cmd_index", _ns(d, None, True))
+    after = (d / "index.md").read_text(encoding="utf-8")
+    ok = code == 0 and "人工补充说明" not in after and "index-meta:" in after
+    record("v1.2 A-2: --force overwrites manual content", ok, f"exit={code}")
+    code, exc = run("cmd_index", _ns(d, None, True))
+    record("v1.2 A-2: --force on clean index no-op-safe", code == 0 and exc is None, f"exit={code}")
+
+    # --- A-3: Record time updated by index command ---
+    d = fresh(work, "v12_a3_time")
+    (d / "index.md").write_text(
+        "# Index\n\nRecord time: 2000-01-01\n\n## Root layout\n```\n(placeholder)\n```\n\n## Change log\n- x\n",
+        encoding="utf-8",
+    )
+    code, exc = run("cmd_index", _ns(d, None, None))
+    after = (d / "index.md").read_text(encoding="utf-8")
+    ok = code == 0 and "Record time: 2000-01-01" not in after
+    record("v1.2 A-3: index updates Record time", ok, f"exit={code}")
+
+    # --- A-4: index writes meta params; check reads them when args are absent ---
+    d = fresh(work, "v12_a4_meta")
+    run("cmd_init", _ns(d, "Test", False))
+    run("cmd_index", _ns(d, None, None), max_depth=1)
+    code, exc = run("cmd_check", _ns(d, None, None),
+                    max_depth=None, max_note_length=None, root_section=None, changelog_section=None)
+    record("v1.2 A-4: check honors index meta params (no false stale)", code == 0 and exc is None, f"exit={code}")
+
+    # --- A-4: custom section names persisted in meta for later check ---
+    d = fresh(work, "v12_a4_custom")
+    run("cmd_init", _ns(d, "Test", False))
+    (d / "index.md").write_text(
+        "# 索引\n\n## 根目录\n```\n(占位)\n```\n\n## 变更记录\n- init\n",
+        encoding="utf-8",
+    )
+    run("cmd_index", _ns(d, None, None), root_section="## 根目录", changelog_section="## 变更记录")
+    code, exc = run("cmd_check", _ns(d, None, None),
+                    max_depth=None, max_note_length=None, root_section=None, changelog_section=None)
+    record("v1.2 A-4: custom sections persisted in meta for check", code == 0 and exc is None, f"exit={code}")
+
+    # --- A-9a: stale index yields Expected/Actual diff lines ---
+    d = fresh(work, "v12_a9a_diff")
+    run("cmd_init", _ns(d, "Test", False))
+    run("cmd_index", _ns(d, None, None))
+    (d / "new_file.txt").write_text("x", encoding="utf-8")
+    is_fresh, diffs = governance._index_state(d, d / "index.md", _ns(d, None, None))
+    ok = is_fresh is False and any("new_file.txt" in line for line in diffs) and any("期望" in line for line in diffs)
+    record("v1.2 A-9a: stale index yields Expected/Actual diff", ok)
+
+    # --- A-9b: legal user-fill placeholders never flagged ---
+    d = fresh(work, "v12_a9b_placeholder_ok")
+    run("cmd_init", _ns(d, "Test", False))
+    run("cmd_index", _ns(d, None, None))
+    stale = governance._unreplaced_placeholders(d)
+    record("v1.2 A-9b: legal template placeholders not flagged", stale == [], str(stale))
+
+    # --- A-9b: leftover AUTO placeholder is detected ---
+    d = fresh(work, "v12_a9b_placeholder_detect")
+    run("cmd_init", _ns(d, "Test", False))
+    (d / "AGENTS.md").write_text("# {{PROJECT_NAME}}\n\nx\n", encoding="utf-8")
+    stale = governance._unreplaced_placeholders(d)
+    record("v1.2 A-9b: unreplaced AUTO placeholder detected",
+           any(f == "AGENTS.md" and k == "{{PROJECT_NAME}}" for f, k in stale), str(stale))
+
+    # --- A-9b: legacy index without meta comment still passes ---
+    d = fresh(work, "v12_a9b_legacy")
+    run("cmd_init", _ns(d, "Test", False))
+    run("cmd_index", _ns(d, None, None))
+    text = (d / "index.md").read_text(encoding="utf-8").replace("<!-- index-meta:", "<!-- x-meta:")
+    (d / "index.md").write_text(text, encoding="utf-8")
+    code, exc = run("cmd_check", _ns(d, None, None),
+                    max_depth=None, max_note_length=None, root_section=None, changelog_section=None)
+    record("v1.2 A-9b: legacy index without meta still passes", code == 0 and exc is None, f"exit={code}")
+
+    # --- A-9b: notes feature disabled -> no stale warning ---
+    d = fresh(work, "v12_a9b_notes_disabled")
+    make_index_md(d)
+    stale = governance._notes_stale_paths(d)
+    record("v1.2 A-9b: notes feature disabled -> no stale warning", stale == [], str(stale))
+
+    # --- A-9b: stale notes path flagged ---
+    d = fresh(work, "v12_a9b_notes_stale")
+    make_index_md(d)
+    (d / "src").mkdir()
+    (d / "src" / "main.py").write_text("x", encoding="utf-8")
+    write_json(d / "index_notes.json", {"src/main.py": "ok", "gone.txt": "stale"})
+    stale = governance._notes_stale_paths(d)
+    record("v1.2 A-9b: stale notes path flagged", stale == ["gone.txt"], str(stale))
+
+    # --- A-9b: version consistency only checked when parseable ---
+    d = fresh(work, "v12_a9b_ver_ok")
+    (d / "SKILL.md").write_text('---\nname: x\nversion: "1.1.0"\n---\n', encoding="utf-8")
+    (d / "CHANGELOG.md").write_text("# CL\n\n## [1.1.0] — 2026-08-20\n\nok\n", encoding="utf-8")
+    w = governance._version_consistency_warning(d)
+    record("v1.2 A-9b: version consistent -> no warning", w is None, str(w))
+
+    d = fresh(work, "v12_a9b_ver_mismatch")
+    (d / "SKILL.md").write_text('---\nname: x\nversion: "1.2.0"\n---\n', encoding="utf-8")
+    (d / "CHANGELOG.md").write_text("# CL\n\n## [1.1.0] — 2026-08-20\n\nok\n", encoding="utf-8")
+    w = governance._version_consistency_warning(d)
+    record("v1.2 A-9b: version mismatch flagged", w is not None, str(w))
+
+    d = fresh(work, "v12_a9b_ver_table")
+    (d / "CHANGELOG.md").write_text("# CL\n\n| Date | Change |\n|---|---|\n| 2026-08-17 | init |\n", encoding="utf-8")
+    w = governance._version_consistency_warning(d)
+    record("v1.2 A-9b: table-format CHANGELOG not flagged", w is None, str(w))
+
+
 def main() -> int:
     with tempfile.TemporaryDirectory(prefix="gov_test_") as tmp:
         work = Path(tmp)
@@ -684,6 +818,7 @@ def main() -> int:
         test_check(work)
         test_destructive(work)
         test_adversarial(work)
+        test_v120_features(work)
 
     fails = [r for r in RESULTS if not r[1]]
     print("\n" + "=" * 60)
