@@ -63,6 +63,99 @@ Updated: 2026-09-10
 - 报告：**docs/release-acceptance-v1.2.0.md**。scope 冻结。
 - **状态：确认点 1 已放行，待确认点 2**：push 主仓库 → 重打 v1.2.0 zip。
 
+## 本轮进展 7（2026-09-10）：确认点 2 完成——发布、冲突解决、回复维护者
+- 提交：验收报告 + handoff 进展 6（8571baf）→ push 个人仓库 `Century0327/project-governance`（走代理 127.0.0.1:7897，git 直连 443 被重置）。
+- 重打 **project-governance-v1.2.0-skillhub.zip**（50,319 B；排除 .skillignore 8 项 + tests/.gitignore/旧 zip；内容 7 项与 v1.1.0 一致）；删除 v1.1.0 zip。zip 不进 git（产物）。
+- PR #22（trae-community/trae-skills）：维护者 MasamiYui 曾评论 "please resolve the conflict"。已在 fork `Century0327/trae-skills` 的 `add/project-governance-skill` 分支：更新 skill 至 v1.2.0（4b0d438）→ merge upstream/main 解决 README.md / README.zh-CN.md 表格冲突（c0fad60，保留 cycle-delivery/gbr-pair/docx-diff-comment 行）→ push → **mergeable: MERGEABLE**（BLOCKED 因组织分支保护需维护者 review）。
+- 已回复 MasamiYui（comment-5608447805）：冲突已解决 + v1.2.0 更新说明 + 请求 re-review。
+- 遗留：PR 合并需维护者批准；**下次会话先查 PR #22 是否已合并/有无新评论**。
+
+## 本轮进展 8（2026-09-10）：PR #22 已合并，v1.2.0 正式发布
+- 维护者 MasamiYui **APPROVED（LGTM）** 于 2026-09-10 02:47 UTC，随即合并 PR #22（mergedAt 02:47:38Z）。
+- 已验证主仓库 trae-community/trae-skills main：skills/project-governance/SKILL.md version="1.2.0"、governance.py 604 行（与本地一致）、README 表格含 project-governance 行。
+- 发布闭环完成：本地提交 → 个人仓库 push → fork 更新 → 合并 → 主仓库 v1.2.0。
+- 待办：本地 handoff 进展 7+8 未提交到个人仓库（8571baf 之后）；zip 产物不进 git。
+
+## 新任务登记（2026-09-12）：社区发言运营（用户社恐，委托代起草+代发）
+- 需求：用户希望我维护论坛/GitHub/SkillHub/HuggingFace 等社区的发言与回复（社恐，降低社交负担）。
+- 调研完成：**docs/community-map.md**（社区地图与优先级）。要点：S 级 forum.trae.cn + GitHub trae-community；A 级 ClawHub（clawhub.ai）+ 腾讯云 SkillHub（frontmatter 已对齐）；B 级 HuggingFace/掘金/知乎/CSDN；C 级 Reddit/V2EX/OpenClaw 中文（待验证）。
+- 工作流：我起草 → 用户确认 → 发布。**可代发**：GitHub（有 gh 认证）、ClawHub/SkillHub（CLI，待授权）；**仅草稿**：需用户账号的平台（论坛/掘金/知乎等）。外发必先确认。
+
+## 本轮进展（2026-09-12）：全盘 changelog 扫描完成，事故案例库就绪
+- 用户纠正"只看部分 changelog 不够"，要求全 D 盘 + E 盘扫描。已按索引（D 根 index.md / E 苏狐 index.md）完成：
+  - 读全 5 份 CHANGELOG：D 根（167 行）/ workspace/tests（2192 行，提取全部标题）/ E 苏狐（109 行）/ cdu-freshman-guide v1.4.0 / douyinwenan_upgrade v2.0.0（含 douyin-edu-copywriting）。
+  - 读全 3 份错误档案：D 根 LESSONS（5 条）/ workspace LESSONS（32 条，含"历史复发"标注）/ E 苏狐 LESSONS（11 条）。
+  - 确认 E 盘其余 CHANGELOG 均为游戏 mod（无关）；D 盘 auto_changelog.md 为机器维护（13 行）。
+- 产出：**docs/changelog-scan-20260912.md**（问题全景 7 类 + 治理映射表 + 5 个故事性素材 + 数据源索引）。
+- 增补：**fact-pack-forum-post.md 新增第 11 部分"真实事故案例库"**（案例 A-H，脱敏版，引用前需确认）。
+- 核心发现：发生过的问题 7 类中 6 类是治理体系设计靶子（版本参数用错 / AI 失忆找不到文件 / 重复犯错 / 静默破坏 / 编码环境坑 / 过程纪律缺失），另有社区发布流程类 1 类。
+
+## 本轮进展（2026-09-12）②：发帖素材勘探完成（按 GPT 六范围，未文章化）
+- 产出：**docs/fact-mining-forum-post-20260912.md**（素材勘探报告）。
+  - 1.项目真实痛点：14 条有"前因→事故→修正"闭环的案例池（来源=workspace 32 条 LESSONS 全文 + D 根 5 条 + 苏狐 11 条 + 社区项目 changelog）。
+  - 2.治理机制映射表：10 组"事故→机制→前后变化"。
+  - 3.故事性排序 5 案例（五要素齐全）：A=index 吞人工内容（治理工具自身事故，★★★★★）＞ B=对抗性测试漏 11 崩溃（"用户是邪恶的"）＞ C=blacklist 一句话不精确（治理规则源头）＞ D=handoff 膨胀 101KB ＞ E=凭文件名猜结论。备选：误覆盖长文档 / 上下文污染（留第二篇）/ AI 读图判错。
+  - 4.证据盘点：文本/代码证据齐（3 审计文档/692 行核心/92 用例/11 模板/PR#22），**全盘无截图**，已标注可补位置。
+  - 5.版本演化：v1.0.0（漫画管线事故沉淀）→ v1.1.0（SkillHub+中文化+HINT）→ v1.2.0（三轮审计 14 项，A-2 为真实事故驱动）。
+  - 6.社区验证：PR #22 实查（2026-08-16 创建 → 09-07 维护者要求解冲突 → 09-09 作者升级 v1.2.0 → 09-10 LGTM + MERGED，commit 0931b9ad）。
+- 数字验证：governance.py 恰 692 行 ✅；test_governance.py 834 行、record() 逐条计 PASS/FAIL，92 用例与 CHANGELOG/PR 一致 ✅。
+- 隐私标注：涉苏狐/QQ/记忆的 4 处已标【需用户确认后公开】；漫画管线细节建议脱敏。
+- 严格遵守 GPT 边界：未设计标题、未写开场、未润色、未拔高。
+
+## 本轮进展（2026-09-12）③：诞生前史勘探完成（按 GPT A-E 结构，证据先行、未反推）
+- 产出：**docs/prehistory-timeline-20260912.md**（Project Governance 诞生前史 + 时间线）。
+- 突破性证据（文件时间戳）：治理体系**不是渐进生长，是 08-12 凌晨 02:15~07:20 集中建立**（PROJECT→session_handoff→AGENTS→CHANGELOG→LESSONS×2，5 小时内 6 文件）。
+- 治理前（07-30~08-11）非空白：08-02 指导手册-AI阅读.md（首次"给 AI 立规矩"，含"Step5 Quality Check：不是 AI 自己觉得不错，而是检查"——check 命令思想源头）；08-09 22:14 架构.md；**08-09 23:27 测试稳定版本索引.md（whitelist/blacklist 与 check 的直接前身，"人工判断>AI判断"分离）**；08-09"项目记忆更新"条目机制。
+- 治理前事故 8 案（A2 参考图用错/B5 AI 误判融合/DreamShaper 挂画失败/B8 复用旧图三重否定/B21 FAILED/架构五版并存/结论散落/C01-1 当天 8 错），全按 6 问作答。
+- "第一次真正意识到需要项目治理"三候选：萌芽=08-02 指导手册；首个治理产物=08-09 稳定版本索引；**系统性起点=08-12 02:15 PROJECT.md**（推荐标注口径已写好）。
+- 【时间无法确认】4 处：08-12 凌晨直接触发事件、非结构化 blacklist 首次出现、A2/B21 原始发生日——均已标注，未推测。
+- git 铁证：本地 Initial commit 08-17 21:25；PR #22 北京 08-17 03:17 创建。
+
+## 本轮进展（2026-09-12）④：skill 成型前后效果对比完成（数据版）
+- 产出：**docs/skill-before-after-comparison-20260912.md**。按三期（治理前 08-02~11 / 治理体系建立 08-12 / skill 成型 08-17 起）逐文件实测计数。
+- 核实修正：**"tests CHANGELOG 149 条目"原归类有误**——该文件记录 08-05~08-24 全期测试（治理前 28 条 / 治理后 121 条），skill 成型后仅占约 40%，不能当"成型后成绩单"。
+- 核实数据：旧架构 CHANGELOG 67 条（08-03~14）；workspace LESSONS 30 条错误（#1-32 缺 9/10，2 条"历史复发"#14/#17）；tests CHANGELOG 149 条（28/14/107）；skill 用例 43→60→76→92；对抗性 17 用例暴露 11 缺陷→0；session_handoff 现 19,028 B（101KB 事故后）。
+- 关键新发现：**cdu-freshman-guide / douyinwenan_upgrade 目录内无任何治理文件 → skill 外部采用证据 = 0**（复用层归因需悬置）。
+- 结论分层：A 档工具层"明显变好"（缺陷 11→0、用例 +114%、PR LGTM）证据硬；B 档治理层机制落地为实但效果被"08-18 后测试骤停"混淆；C 档复用/体验层无证据。归因存疑 4 项已列。
+
+## 本轮进展（2026-09-16）⑤：外部 review（DeepSeek/Kimi 提三层架构 vs GPT 提最小补丁）→ 审计 + 补丁方案完成
+- 触发：GPT 反驳 DeepSeek 三层架构方案，主张"SKILL.md 148 行不超限（<500 行），真问题是'触发后默认全面治理'"，给出 P0 实测 + P1-P4 最小补丁路线。
+- 核查（全部本地实测 + 官方原文）：SKILL.md 192 行/148 有效/9,185 B/v1.2.0 ✅；「日常维护（每个会话）」措辞属实 ✅；Trae 官方「动态按需加载，先扫描 description」原话 ✅；OpenAI skill-creator 三级披露/不建无意义 router 原文 ✅；Trae best-practice（误区二/三、description≤1024、评测驱动失败优先）✅。
+- 补充量化：description 708 字符未超 1024 上限，但中英近乎重复（中文 360 + 英文 348）→ 触发扫描面一半浪费。
+- 独立判断：**SKILL.md 的默认流比用户自己实际实践更重**（用户规则是任务触发式：找文件才查索引、任务结束才更新 changelog）——"文档比实践过度"的硬证据。
+- 产出：**docs/skill-patch-plan-trigger-scope-20260916.md**（核查表 + P1-P4 补丁全文草案 + P0 触发实测 5 用例 + A/B 验证设计 + 不做清单）。
+- 补丁范围：P1 第3步改"按任务需要"+"任务→文件映射表"；P2 结束更新改条件式；P3 description 去重（708→~360，保触发关键词）；P4 何时使用/不用压缩为边界。全不动 governance.py/templates/tests；版本拟 v1.2.1。
+
+## 本轮进展（2026-09-16）⑥：GPT 二轮收紧 5 处 + P1/P2 语义审校 → 方案升为 v2 最终改稿
+- GPT 批准方向，要求改前先做 P1/P2 语义审校（通用 Skill 规则 vs 项目具体规则），并提 5 处收紧：①"禁止盲目搜索"过强→"索引优先；缺失/过期可搜索并视情况更新"；②score>0.85 阈值不上浮通用层→"优先继承已验证条目"；③P3 目标=触发判别信息密度而非词覆盖率；④P0 中"不触发"不写死，"是否触发"降辅助指标、核心=触发后是否过度介入；⑤总原则="不要求少触发，要求触发后只执行与任务相关的治理动作"。
+- 审校结论：第 3 步有 4 处项目具体机制上浮到通用层（固定三件套流程、注册表文件名、0.85 阈值、permanent_ban 字段名）→ SKILL.md 只留通用原则+映射表，数值/字段名权威下沉模板与 schema。佐证实例：用户自己规则"绝对禁止直接搜索文件"比通用层该有的强，正说明具体规则不该平移到通用层。
+- 产出更新：**docs/skill-patch-plan-trigger-scope-20260916.md** 已升 v2 最终改稿（P1+P2 合并重写第 3 步全文、P3 新 description ~330 字符、P4 边界压缩、P0 修订表）。
+- 待执行：SKILL.md 应用补丁（version→1.2.1）→ 跑 92 用例确认无影响 → CHANGELOG 记一条 → A/B 对照实测。
+
+## 本轮进展（2026-09-16）⑦：v1.2.1 补丁已落地（SKILL.md 已改 + 92/92 通过 + CHANGELOG 已记）
+- GPT 三轮收紧（P3 description 末句改触发场景；P0 加用例 F"明确治理任务只需局部能力"形成 6 用例梯度；triggers 定性为社区约定/辅助元数据——已核实 trae-skills 公开标准 frontmatter 仅 name+description）。
+- **已执行**：SKILL.md 4 处补丁（version→1.2.1；description 708→279 字符；何时使用/不用压缩；第 3 步重写为"按任务需要"+映射表+条件式更新）→ tests 92/92 PASS（stdlib-only）→ CHANGELOG 记 [1.2.1]（含审校说明与 6 用例验证设计）。
+- 验证后 SKILL.md：214 行，frontmatter 15 键完整（name/version/description/triggers 均在）。
+- 方案文档：docs/skill-patch-plan-trigger-scope-20260916.md（v2 + 三轮修订，最终改稿）。
+
+## 本轮进展（2026-09-16）⑧：A/B 实测就绪（对照材料 + 手册）
+- GPT 批准进入 A/B 实测，不再改 SKILL.md；留下关键观察点："模型主动读了什么" vs "Skill 文本自带提及但未实际读取"（token 成本只看前者）；triggers 建议保持现状不再动。
+- **已执行**：下载线上 main 1.2.0（9185 B/192 行）到 `D:\Stable Diffusion\workspace\tests\ab-v120-vs-v121\SKILL-1.2.0-线上.md`；本地 1.2.1（9308 B/214 行）另存对照 → 产出 **docs/ab-test-guide-20260916.md**（唯一判据 + 两版行为差异速览 + 6 用例 prompt + 跑法 A/B + 记录表含"主动读取 vs 上下文已有"区分 + 判定标准 + 结果去向）。
+- 待用户执行：跑 6 用例（推荐方案 A：日常项目新会话顺带做，不烧积分）；结果回填 changelog（区分 AI/人工评审）。
+
+## 本轮进展（2026-09-16）⑨：AI 侧模拟测试完成（判定通过）；人工侧改为"粗略感知"
+- 用户决策：不做人工 A/B（user memory 自动读取会污染对照）；人工侧只切 1.2.1 正常使用 + 粗略感知；AI 侧自行测试。
+- **AI 模拟测试**：建隔离项目 `tests/ab-v120-vs-v121/sim-project/`（11 文件），两个独立子代理分别注入 1.2.0（线上）/1.2.1（本地）SKILL.md，对 6 用例做只读行为推演（不碰用户记忆）。结果：1.2.0 全部 6 例默认"会话开始读三件套"，B/C/F 超额读 2-3 个治理文件，E 被升级成更新 3 个治理文件；1.2.1 每例收敛到映射表对应文件，F 只取 index+VERSIONS。**判定通过**；观察项 1：A 结束时仍记 CHANGELOG+handoff（P2 裁量边界）。
+- 产出：**docs/ab-test-ai-sim-20260916.md**；CHANGELOG v1.2.1 测试段补 AI 模拟评审（区分 AI/人工，人工粗略感知待补）。
+- 版本一致性确认：SKILL.md=1.2.1 = CHANGELOG 最新 1.2.1 ✅。
+- 测试边界（诚实声明）：模拟验证的是指令遵循度，非宿主触发机制（触发=辅助指标，会话内不可观测）；人工粗略感知结果回填后形成完整评审。
+
+## 下一步（待用户拍板）
+1. 用户将前史勘探报告（docs/prehistory-timeline-20260912.md）+ 素材勘探报告（docs/fact-mining-forum-post-20260912.md）+ 效果对比（docs/skill-before-after-comparison-20260912.md）转交 GPT 出最终论坛稿（叙事基线="一开始根本没想做治理"→事故→立规矩→规矩成系统→回头发觉已是 Skill）。
+2. 发布前需用户确认：①隐私标注 4 处；②是否补拍证据截图；③对比稿 Q3 口径——论坛稿只讲 A 档可量化、"skill 变好用"不归因于 skill 本身防错、C 档复用证据不主动提。
+3. **人工粗略感知**（进行中）：用户日常使用 1.2.1 后把感受（好用/卡/漏读/多读）告诉我，回填 CHANGELOG 人工评审栏。
+4. **发布动作**（待确认）：git commit → push → 重打 zip → PR 更新（或新 PR）。
+
 ## 修订后的 v1.2.0 执行范围（以校准后最终边界为准）
 - 最终边界见 **docs/audit-v3-calibration.md**（校准后 14 项：必须修 7 + 建议修 6 + H-1；H-2 已并入 A-5a；新增 M-1）。前两轮裁定文档（change-budget 12 项）仅作背景，凡冲突处以校准报告为准。
 - 进入项要点：

@@ -1,8 +1,8 @@
 ---
 name: project-governance
-version: "1.2.0"
+version: "1.2.1"
 title: Project Governance
-description: 为 AI 长期项目建立「项目记忆 + 文件索引 + 工作规则 + 版本记录」的治理系统，让 AI 在长期项目里「不忘事、不乱改、不重复犯错」，换会话后仍能接着做。Set up and maintain a project governance workspace for AI-assisted long-running projects — project protocol (AGENTS.md), directory index (index.md), error log (LESSONS.md), session handoff, changelog, stable version index (VERSIONS.md), whitelist/blacklist parameter registries. Use when the user complains the project is messy, files are scattered or misplaced, the AI repeats mistakes or uses wrong versions, the user expects the AI to find files itself instead of asking for paths, when starting a new AI-assisted project, onboarding an AI agent into an existing project, or when a project lacks structured rules/versioning.
+description: 为 AI 长期项目建立项目记忆、文件索引、工作规则与版本记录的治理系统，让 AI 跨会话不忘事、不乱改、不重复犯错。Use when a project is messy, files are scattered, the AI keeps repeating mistakes or picks wrong versions, or you need to establish persistent rules and file/version conventions for a new or rule-less AI-assisted project.
 author: Century0327
 license: MIT-0
 template: skill
@@ -74,21 +74,17 @@ examples:
 
 ## 何时使用 / 何时不用
 
+触发主要由 frontmatter `description` / `triggers` 决定；本节只写边界，避免误用。
+
 ### 何时使用
 
-- 用户抱怨项目太乱、文件散落、AI 总是乱放文件（"你怎么又乱放文件"）。
-- 用户期望 AI 自己找文件，而不是问路径（"你自己找"）。
-- AI 反复犯同样的错误，或总是用错版本。
-- 用户说"你不是应该记得吗？""上次不是已经验证过了吗？""哪个才是最终版？""别重新做，之前已经跑通了"——这些是记忆与治理边界场景，仅靠记忆不可靠。
-- 开始一个新的 AI 辅助项目，希望从第一天起就让 Agent 遵循稳定协议。
-- 把一个 AI Agent 接入一个没有规则、错误日志、参数注册表的既有项目。
-- 项目已经变乱：文件散落、参数改了没记录、过去的错误反复出现。
-- 想强制落地一些持久规则，例如"先查索引再找文件""先计划后执行""文件存在 ≠ 文件有效""参数选择以注册表为准"。
+- 项目乱、文件散、AI 反复犯错或总用错版本、期望 AI 自己找文件。
+- 开始新 AI 项目、把 Agent 接入无规则的既有项目、想强制落地持久规则（先查索引 / 先计划后执行 / 参数以注册表为准）。
 
 ### 何时不用
 
 - 一次性问答或小改动，不需要项目级约定。
-- 项目已有成熟的治理体系，只需要微调某条规则——直接改现有治理文件即可。
+- 项目已有成熟治理体系，只需微调某条规则——直接改治理文件即可。
 
 ## 记忆与治理的边界
 
@@ -123,11 +119,37 @@ python scripts/governance.py init --project-dir /path/to/project --project-name 
 
 编辑生成的 `AGENTS.md`：目录权限分区、自主权等级、产物存放规则，以及"项目定制"下的项目专属规则。通用核心治理规则保持原样。
 
-### 第 3 步 —— 日常维护（每个会话）
+### 第 3 步 —— 按任务需要执行治理
 
-1. **会话开始**：读 `index.md` → `session_handoff.md` → `LESSONS.md`；生成参数前，读 `blacklist.json` / `whitelist.json`。
-2. **工作中**：通过索引找文件（禁止盲目搜索）；优先继承 `score > 0.85` 的 whitelist 条目；绝不使用 `permanent_ban: true` 的参数；新错误记入 `LESSONS.md`。
-3. **会话结束**：更新 `session_handoff.md`、`index.md`（文件变动）、`CHANGELOG.md`（决策）。
+**核心原则**：本 Skill 不追求"少触发"，而要求触发后只执行与当前任务相关的治理动作。
+
+先判断本次任务需要哪些治理信息，只读取相关文件，不默认读全套：
+
+| 本次任务涉及 | 首选读取 |
+|---|---|
+| 文件定位 / 项目结构 | `index.md` |
+| 上次进度 / 跨会话继续 | `session_handoff.md` |
+| 避免重复历史错误 | `LESSONS.md` |
+| 版本选择 | `VERSIONS.md` |
+| 参数或方案选择 | 项目的参数/方案注册表（如 `whitelist.json` / `blacklist.json`） |
+| 架构或项目决策 | `CHANGELOG.md` / `ARCHITECTURE.md` |
+| 建立治理体系 | 第 1 步 `init` |
+| 治理文件健康检查 | 第 4 步 `validate` / `check` |
+| 目录结构变化 | 第 4 步 `index` |
+
+工作中遵循通用治理原则：
+
+- **索引优先**：通过 `index.md` 优先定位文件；索引缺失、过期或无法定位时，搜索文件，并视情况更新索引。
+- **参数从注册表取**：项目存在参数/方案注册表时，优先继承已验证条目，不使用已标记禁用的条目。具体字段与阈值以模板和项目规范为准。
+- **新错误入档**：发现可复用的错误与纠正，记入 `LESSONS.md`。
+
+任务结束时，只更新发生了变化且有持久价值的治理文件：
+
+- 跨会话仍需继续 → 更新 `session_handoff.md`
+- 文件结构发生变化 → 更新 `index.md`
+- 形成新的项目/架构决策 → 更新 `CHANGELOG.md`
+- 发现可复用的错误与纠正 → 更新 `LESSONS.md`
+- 没有对应变化时，不创建或更新治理记录。
 
 ### 第 4 步 —— 校验、索引、检查
 
