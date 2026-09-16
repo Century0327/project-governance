@@ -150,11 +150,23 @@ Updated: 2026-09-10
 - 版本一致性确认：SKILL.md=1.2.1 = CHANGELOG 最新 1.2.1 ✅。
 - 测试边界（诚实声明）：模拟验证的是指令遵循度，非宿主触发机制（触发=辅助指标，会话内不可观测）；人工粗略感知结果回填后形成完整评审。
 
+## 本轮进展（2026-09-16）⑩：发布节奏定案——v1.2.1 已发自己仓库，社区主仓冻结
+- GPT 定案：v1.2.1 先发自己仓库（Century0327/project-governance），**不**提 trae-community/trae-skills；等 1-2 个真实可复现问题（如"局部治理判断仍过宽""某类任务错误更新 CHANGELOG/handoff""跨平台加载行为差异"）累积成 v1.2.2/v1.3.0 再提 PR；例外=修复了影响社区用户的明确错误（非作者工作流独有）才紧急发社区。
+- **已执行**：git commit `106b49c`（SKILL.md+CHANGELOG+session_handoff+3 个 patch 相关 docs，6 文件 410+/15-）→ push origin master 成功（8571baf..106b49c）。项目记忆已建 project_memory.md（发布节奏 + 关键约束）。
+- 未纳入本次提交（留给后续）：6 个论坛素材 docs（prehistory/fact-mining/changelog-scan/community-map/fact-pack/skill-before-after）+ `project-governance-v1.2.0-skillhub.zip` 打包产物。
+
+## 本轮进展（2026-09-17）⑪：README 一致性修复（用户怀疑成立，全仓库排查确认仅此一处）
+- 用户怀疑"只改了个别文件"→ 成立：GPT 抓已发布 v1.2.1 源码发现 README「执行纪律」仍写旧行为（"每次会话结束写 session_handoff"与 1.2.1 冲突）。
+- **全仓库关键词扫描**（盲目搜索/每次会话/会话开始/会话结束/score 0.85/permanent_ban/先查/先找/黑名单/白名单/绝对）确认：**仅 README.md 执行纪律段（75-79 行）为旧语义**；其余命中（templates/AGENTS.md 字段名、templates/LESSONS.md 教训示例、examples 示例数据、README 注册表 Schema 段）均属实现层或历史记录，按"下沉而非删除"原则保留。
+- **已改**：README 执行纪律 4 条 → GPT 最小修法（索引优先含缺失可搜索 / 参数从注册表取 / 新错误入档 / 按需更新）；CHANGELOG [1.2.1] 补"修复（2026-09-17 follow-up）"小节。
+- 待确认：README+CHANGELOG 变更 commit/push（自己仓库）；是否重打 v1.2.1 zip。
+
 ## 下一步（待用户拍板）
 1. 用户将前史勘探报告（docs/prehistory-timeline-20260912.md）+ 素材勘探报告（docs/fact-mining-forum-post-20260912.md）+ 效果对比（docs/skill-before-after-comparison-20260912.md）转交 GPT 出最终论坛稿（叙事基线="一开始根本没想做治理"→事故→立规矩→规矩成系统→回头发觉已是 Skill）。
 2. 发布前需用户确认：①隐私标注 4 处；②是否补拍证据截图；③对比稿 Q3 口径——论坛稿只讲 A 档可量化、"skill 变好用"不归因于 skill 本身防错、C 档复用证据不主动提。
-3. **人工粗略感知**（进行中）：用户日常使用 1.2.1 后把感受（好用/卡/漏读/多读）告诉我，回填 CHANGELOG 人工评审栏。
-4. **发布动作**（待确认）：git commit → push → 重打 zip → PR 更新（或新 PR）。
+3. **人工粗略感知**（进行中）：用户日常使用 1.2.1 后把感受告诉我，回填 CHANGELOG 人工评审栏；出现真实问题即记录，攒 1-2 个后规划 v1.2.2。
+4. **社区主仓**：冻结，等真实使用证据后再评估 PR。
+5. **README follow-up 提交**（新）：确认后 commit+push（自己仓库）+ 可选重打 v1.2.1 zip。
 
 ## 修订后的 v1.2.0 执行范围（以校准后最终边界为准）
 - 最终边界见 **docs/audit-v3-calibration.md**（校准后 14 项：必须修 7 + 建议修 6 + H-1；H-2 已并入 A-5a；新增 M-1）。前两轮裁定文档（change-budget 12 项）仅作背景，凡冲突处以校准报告为准。

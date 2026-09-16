@@ -73,10 +73,10 @@ AUTHORITATIVE → STABLE → EXPERIMENTAL → HISTORICAL → DEPRECATED → ARCH
 文件存在 ≠ 文件有效。AI 必须先确认文件权威性，再使用。
 
 **执行纪律**
-- 先查 index，再找文件
-- 参数从 whitelist 继承，blacklist 永久禁用参数一律不用
-- 犯错→记录到 LESSONS→下次不再犯
-- 每次会话结束写 session_handoff
+- 索引优先：通过 `index.md` 优先定位文件；索引缺失、过期或无法定位时再搜索，并视情况更新索引
+- 参数从注册表取：存在参数/方案注册表时，优先继承已验证条目，不使用已标记禁用的条目
+- 新错误入档：发现可复用的错误与纠正，记录到 `LESSONS.md`
+- 按需更新：任务结束时，只更新发生了变化且具有持久价值的治理文件
 
 ## 命令行工具
 

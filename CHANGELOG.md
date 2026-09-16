@@ -20,6 +20,12 @@
 - `triggers` 保留 10 条，但定性为**社区约定/辅助元数据**：trae-skills 仓库公开标准 frontmatter 仅 `name + description`（description 决定何时加载），本地抓取的 Trae 官方文档亦未提及 triggers，故不将其表述为官方触发机制。
 - 审校方法：P1/P2 语义审校（通用 Skill 规则 vs 项目具体规则）。佐证实例——作者本人项目规则"找文件时绝对禁止直接搜索"强于通用层应有强度，说明具体规则不能平移到通用层。
 
+### 修复（2026-09-17 follow-up：README 一致性同步）
+
+- README「执行纪律」4 条同步 1.2.1 语义：`先查 index，再找文件` → `索引优先（缺失/过期/无法定位时可搜索并视情况更新索引）`；`参数从 whitelist 继承，blacklist 永久禁用参数一律不用` → `参数从注册表取（已验证条目优先，禁用条目不用）`；`每次会话结束写 session_handoff` → `按需更新（只更新发生变化且有持久价值的治理文件）`。
+- 触发：GPT 抓已发布 v1.2.1 源码发现 README 仍写旧行为（"每次会话结束写 session_handoff"与 1.2.1 直接冲突）；Trae 侧全仓库关键词扫描确认**仅 README 执行纪律段**为旧语义，schema/模板/示例/历史文档均属实现层或历史记录，按"下沉而非删除"原则保留。
+- 发行包重打：`project-governance-v1.2.0-skillhub.zip` → `project-governance-v1.2.1-skillhub.zip`（内容 = 1.2.1 快照，含 README 同步；顺带修复旧包混入 `scripts/__pycache__/*.pyc` 的打包泄漏，.skillignore 排除规则生效）。旧包已删除，避免源码 1.2.1 / 发行包 1.2.0 的版本漂移。
+
 ### 测试
 
 - `tests/test_governance.py` 92 个用例全部通过（stdlib-only），SKILL.md 补丁不影响 CLI 逻辑。
